@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAllBookings } from '@/lib/db';
 import { generateBookingsExcel } from '@/lib/export-excel';
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET_KEY || 'atmos2025';
+const ADMIN_SECRET = process.env.ADMIN_SECRET_KEY || 'AtmoS22F';
 
 export async function GET(req: NextRequest) {
   try {

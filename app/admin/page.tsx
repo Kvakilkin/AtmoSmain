@@ -28,7 +28,7 @@ interface Booking {
 }
 
 export default function AdminPage() {
-  const [adminKey, setAdminKey] = useState<string>('atmos2025');
+  const [adminKey, setAdminKey] = useState<string>('');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -137,7 +137,7 @@ export default function AdminPage() {
               <div className="h-7 w-[1px] bg-white/20" />
               <img
                 src="/images/logo-atmos.png"
-                alt="АТМОС Академия пилотов"
+                alt="АтмоС Академия пилотов"
                 className="h-7 sm:h-9 w-auto object-contain drop-shadow-[0_0_12px_rgba(255,85,0,0.3)]"
               />
             </div>
@@ -147,7 +147,7 @@ export default function AdminPage() {
                 Панель управления записями
               </h1>
               <p className="text-xs text-atmos-muted">
-                РФСОО Федерация гонок дронов РО & Академия пилотов «АТМОС»
+                РФСОО Федерация гонок дронов РО & Академия пилотов «АтмоС»
               </p>
             </div>
           </div>
@@ -190,12 +190,6 @@ export default function AdminPage() {
               >
                 <span>{loading ? 'Проверка ключа...' : 'Войти в панель'}</span>
               </button>
-
-              <div className="pt-2">
-                <span className="text-[11px] text-atmos-subtle">
-                  Ключ по умолчанию для локального тестирования: <code className="text-atmos-orange">atmos2025</code>
-                </span>
-              </div>
             </form>
           </div>
         ) : (

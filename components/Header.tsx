@@ -45,7 +45,7 @@ export const Header: React.FC = () => {
 
           <img
             src="/images/logo-atmos.png"
-            alt="АТМОС Академия пилотов"
+            alt="АтмоС Академия пилотов"
             className="h-6 sm:h-8 w-auto object-contain hover:scale-105 transition-transform"
           />
         </div>

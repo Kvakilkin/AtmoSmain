@@ -23,13 +23,13 @@ export const Footer: React.FC = () => {
               <div className="h-8 w-[1px] bg-white/20" />
               <img
                 src="/images/logo-atmos.png"
-                alt="АТМОС Академия пилотов"
+                alt="АтмоС Академия пилотов"
                 className="h-8 w-auto object-contain"
               />
             </div>
 
             <p className="text-sm text-atmos-muted max-w-md leading-relaxed">
-              Совместный открытый мастер-класс компании пилотов «Атмос» и Федерации гонок дронов Ростовской области. Развитие технологичного спорта, подготовка будущих пилотов и знакомство с передовыми беспилотными системами.
+              Совместный открытый мастер-класс компании пилотов «АтмоС» и Федерации гонок дронов Ростовской области. Развитие технологичного спорта, подготовка будущих пилотов и знакомство с передовыми беспилотными системами.
             </p>
 
             <div className="pt-2 text-xs text-atmos-subtle">
@@ -45,7 +45,7 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2.5 text-sm text-atmos-muted">
               <li className="flex items-start space-x-2">
                 <MapPin className="w-4 h-4 text-atmos-orange flex-shrink-0 mt-1" />
-                <span>г. Ростов-на-Дону, Дрон-арена «Атмос» (Ворошиловский проспект, 32/104)</span>
+                <span>г. Ростов-на-Дону, Дрон-арена «АтмоС» (Ворошиловский проспект, 32/104)</span>
               </li>
               <li className="flex items-center space-x-2">
                 <Phone className="w-4 h-4 text-atmos-orange flex-shrink-0" />
@@ -106,7 +106,7 @@ export const Footer: React.FC = () => {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-atmos-border/60 flex flex-col sm:flex-row items-center justify-between text-xs text-atmos-subtle gap-4">
           <div>
-            © {new Date().getFullYear()} Компания «АТМОС» & Федерация гонок дронов Ростовской области. Все права защищены.
+            © {new Date().getFullYear()} Компания «АтмоС» & Федерация гонок дронов Ростовской области. Все права защищены.
           </div>
           <div>
             Серверы и базы данных локализованы на территории Российской Федерации (152-ФЗ РФ)

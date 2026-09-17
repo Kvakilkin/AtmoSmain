@@ -35,7 +35,7 @@ export const HeroSection: React.FC = () => {
           <div className="flex items-center justify-center">
             <img
               src="/images/logo-atmos.png"
-              alt="АТМОС Академия пилотов"
+              alt="АтмоС Академия пилотов"
               className="h-10 sm:h-14 md:h-16 w-auto object-contain drop-shadow-[0_0_25px_rgba(255,85,0,0.35)] hover:scale-105 transition-transform duration-300"
             />
           </div>
@@ -54,7 +54,7 @@ export const HeroSection: React.FC = () => {
 
         {/* Subtitle - Short */}
         <p className="max-w-2xl mx-auto text-sm sm:text-base text-atmos-muted leading-relaxed mb-8 font-normal">
-          Открытый мастер-класс Академии пилотов «АТМОС» и Федерации гонок дронов. Бесплатный вход, экипировка выдается.
+          Открытый мастер-класс Академии пилотов «АтмоС» и Федерации гонок дронов. Бесплатный вход, экипировка выдается.
         </p>
 
         {/* Primary CTA and Secondary actions */}
@@ -85,7 +85,7 @@ export const HeroSection: React.FC = () => {
               <div>
                 <div className="flex items-center space-x-2">
                   <h3 className="text-sm sm:text-base font-bold text-white">
-                    Дрон-арена «АТМОС» • Филиал «Центральный»
+                    Дрон-арена «АтмоС» • Филиал «Центральный»
                   </h3>
                   <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/20 text-green-400 border border-green-500/40">
                     Открыто для полетов
@@ -118,7 +118,7 @@ export const HeroSection: React.FC = () => {
               height="100%"
               frameBorder="0"
               allowFullScreen={true}
-              title="Яндекс Карта — Дрон-арена АТМОС, Ворошиловский проспект, 32/104"
+              title="Яндекс Карта — Дрон-арена АтмоС, Ворошиловский проспект, 32/104"
               className="w-full h-full filter contrast-[1.05] brightness-[0.95]"
               loading="lazy"
             />

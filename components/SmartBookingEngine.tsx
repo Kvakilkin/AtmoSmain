@@ -313,7 +313,7 @@ export const SmartBookingEngine: React.FC = () => {
             </h3>
 
             <p className="text-atmos-muted text-xs sm:text-sm mb-6">
-              Ждем вас на открытом мастер-классе пилотов «Атмос» и Федерации гонок дронов.
+              Ждем вас на открытом мастер-классе пилотов «АтмоС» и Федерации гонок дронов.
             </p>
 
             {/* Boarding Pass */}

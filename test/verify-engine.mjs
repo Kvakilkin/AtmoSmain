@@ -4,7 +4,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import * as XLSX from 'xlsx';
 
-console.log('🏁 Запуск комплексного тестирования системы бронирования «АТМОС»...');
+console.log('🏁 Запуск комплексного тестирования системы бронирования «АтмоС»...');
 
 // 1. Проверка логики лимитов слотов (до 14:00 -> 10, после 14:00 -> 5)
 function getSlotCapacity(timeSlot) {

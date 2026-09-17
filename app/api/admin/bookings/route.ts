@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllBookings, deleteBooking } from '@/lib/db';
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET_KEY || 'atmos2025';
+const ADMIN_SECRET = process.env.ADMIN_SECRET_KEY || 'AtmoS22F';
 
 export async function GET(req: NextRequest) {
   try {
