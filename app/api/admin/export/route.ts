@@ -23,10 +23,11 @@ export async function GET(req: NextRequest) {
     }
 
     const date = searchParams.get('date') || undefined;
-    const bookings = getAllBookings(date);
+    const branch = searchParams.get('branch') || undefined;
+    const bookings = getAllBookings(date, branch);
 
     const buffer = generateBookingsExcel(bookings);
-    const filename = `atmos_bookings_${date || 'all'}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    const filename = `atmos_bookings_${branch || 'all'}_${date || 'all'}_${new Date().toISOString().slice(0, 10)}.xlsx`;
 
     // Convert Buffer to Uint8Array for NextResponse
     const uint8Array = new Uint8Array(buffer);

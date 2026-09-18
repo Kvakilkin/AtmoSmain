@@ -9,6 +9,7 @@ export async function sendWebhookNotification(payload: {
   age: number;
   date: string;
   timeSlot: string;
+  branch?: string;
   isMinor: boolean;
   createdAt: string;
 }) {

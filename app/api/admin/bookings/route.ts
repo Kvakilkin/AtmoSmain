@@ -21,7 +21,8 @@ export async function GET(req: NextRequest) {
     }
 
     const date = searchParams.get('date') || undefined;
-    const bookings = getAllBookings(date);
+    const branch = searchParams.get('branch') || undefined;
+    const bookings = getAllBookings(date, branch);
 
     return NextResponse.json({
       success: true,

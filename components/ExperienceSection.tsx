@@ -81,15 +81,15 @@ export const ExperienceSection: React.FC = () => {
             return (
               <div
                 key={item.id}
-                className="group relative rounded-2xl bg-atmos-card/90 border border-atmos-border hover:border-atmos-orange/80 p-8 transition-all duration-300 hover:shadow-card-glow hover:-translate-y-1 backdrop-blur-sm overflow-hidden"
+                className="group relative rounded-2xl bg-atmos-card/90 border border-atmos-border hover:border-atmos-orange/80 p-4 sm:p-8 transition-all duration-300 hover:shadow-card-glow hover:-translate-y-1 backdrop-blur-sm overflow-hidden"
               >
                 {/* Neon top-border light sweep on hover */}
                 <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-atmos-orange to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                <div className="flex items-start justify-between mb-6">
+                <div className="flex items-start justify-between mb-5 sm:mb-6">
                   {/* Icon with glowing background */}
-                  <div className="w-14 h-14 rounded-xl bg-atmos-surface border border-atmos-border group-hover:border-atmos-orange/50 flex items-center justify-center text-atmos-orange group-hover:scale-110 group-hover:shadow-neon-orange transition-all duration-300">
-                    <IconComponent className="w-7 h-7" />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-atmos-surface border border-atmos-border group-hover:border-atmos-orange/50 flex items-center justify-center text-atmos-orange group-hover:scale-110 group-hover:shadow-neon-orange transition-all duration-300">
+                    <IconComponent className="w-6 h-6 sm:w-7 sm:h-7" />
                   </div>
 
                   {/* Step and tag badge */}
@@ -103,11 +103,11 @@ export const ExperienceSection: React.FC = () => {
                   </div>
                 </div>
 
-                <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-atmos-orange transition-colors">
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 group-hover:text-atmos-orange transition-colors text-center sm:text-left w-full">
                   {item.title}
                 </h3>
 
-                <p className="text-atmos-muted text-sm sm:text-base leading-relaxed mb-6">
+                <p className="text-atmos-muted text-sm sm:text-base leading-relaxed mb-6 w-full text-justify sm:text-left [text-justify:inter-word]">
                   {item.description}
                 </p>
 

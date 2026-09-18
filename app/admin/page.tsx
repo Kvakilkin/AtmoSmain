@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   FileSpreadsheet,
   Download,
@@ -14,6 +14,7 @@ import {
   ArrowLeft,
   RefreshCw,
   Trash2,
+  Building2,
 } from 'lucide-react';
 
 interface Booking {
@@ -23,6 +24,7 @@ interface Booking {
   age: number;
   date: string;
   time_slot: string;
+  branch?: string;
   is_minor: number;
   created_at: string;
 }
@@ -35,6 +37,7 @@ export default function AdminPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedBranch, setSelectedBranch] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const handleLogin = async (e?: React.FormEvent) => {
@@ -61,10 +64,11 @@ export default function AdminPage() {
   const reloadData = async () => {
     setLoading(true);
     try {
-      const url = selectedDate
-        ? `/api/admin/bookings?key=${encodeURIComponent(adminKey)}&date=${selectedDate}`
-        : `/api/admin/bookings?key=${encodeURIComponent(adminKey)}`;
-      const res = await fetch(url);
+      const params = new URLSearchParams({ key: adminKey });
+      if (selectedDate) params.append('date', selectedDate);
+      if (selectedBranch && selectedBranch !== 'all') params.append('branch', selectedBranch);
+
+      const res = await fetch(`/api/admin/bookings?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
         setBookings(data.bookings || []);
@@ -78,13 +82,13 @@ export default function AdminPage() {
     if (isAuthenticated) {
       reloadData();
     }
-  }, [selectedDate]);
+  }, [selectedDate, selectedBranch]);
 
   const handleDownloadExcel = () => {
-    const url = selectedDate
-      ? `/api/admin/export?key=${encodeURIComponent(adminKey)}&date=${selectedDate}`
-      : `/api/admin/export?key=${encodeURIComponent(adminKey)}`;
-    window.location.href = url;
+    const params = new URLSearchParams({ key: adminKey });
+    if (selectedDate) params.append('date', selectedDate);
+    if (selectedBranch && selectedBranch !== 'all') params.append('branch', selectedBranch);
+    window.location.href = `/api/admin/export?${params.toString()}`;
   };
 
   const handleDeleteBooking = async (id: number, name: string) => {
@@ -99,64 +103,71 @@ export default function AdminPage() {
       if (res.ok) {
         setBookings((prev) => prev.filter((b) => b.id !== id));
       } else {
-        alert('Не удалось удалить запись. Попробуйте обновить страницу.');
+        alert('Не удалось удалить запись');
       }
     } catch (err) {
-      alert('Ошибка соединения при удалении записи');
+      alert('Ошибка при обращении к серверу');
     }
   };
 
-  const filteredBookings = bookings.filter((b) => {
-    const q = searchQuery.toLowerCase();
-    return b.full_name.toLowerCase().includes(q) || b.phone.includes(q);
-  });
+  const filteredBookings = useMemo(() => {
+    return bookings.filter((b) => {
+      const matchesSearch =
+        b.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        b.phone.includes(searchQuery);
+      return matchesSearch;
+    });
+  }, [bookings, searchQuery]);
 
-  const totalMinors = bookings.filter((b) => b.is_minor === 1).length;
-  const totalAdults = bookings.length - totalMinors;
+  const totalMinors = useMemo(() => bookings.filter((b) => b.is_minor).length, [bookings]);
+  const totalAdults = useMemo(() => bookings.filter((b) => !b.is_minor).length, [bookings]);
 
   return (
-    <div className="min-h-screen bg-atmos-dark text-white p-4 sm:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-8 mb-8 border-b border-atmos-border">
-          <div className="flex items-center space-x-3 sm:space-x-4">
+    <div className="min-h-screen bg-atmos-dark text-white p-4 sm:p-6 lg:p-8 selection:bg-atmos-orange selection:text-black">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Top bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-atmos-border">
+          <div className="flex items-center space-x-4">
             <a
               href="/"
-              className="p-2.5 rounded-xl bg-atmos-surface border border-atmos-border text-atmos-muted hover:text-white transition-colors"
-              title="На главную"
+              className="p-2.5 rounded-xl bg-atmos-surface hover:bg-atmos-card border border-atmos-border text-atmos-muted hover:text-white transition-colors flex items-center space-x-2 text-xs"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
+              <span>На сайт</span>
             </a>
-
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <img
-                src="/images/logo-rfsoo.png"
-                alt="РФСОО Федерация гонок дронов"
-                className="h-10 sm:h-12 w-auto object-contain drop-shadow-[0_0_12px_rgba(0,122,255,0.3)]"
-              />
-              <div className="h-7 w-[1px] bg-white/20" />
-              <img
-                src="/images/logo-atmos.png"
-                alt="АтмоС Академия пилотов"
-                className="h-7 sm:h-9 w-auto object-contain drop-shadow-[0_0_12px_rgba(255,85,0,0.3)]"
-              />
-            </div>
-
             <div>
-              <h1 className="text-xl sm:text-2xl font-black tracking-tight">
-                Панель управления записями
+              <h1 className="text-xl sm:text-2xl font-black text-white flex items-center space-x-2">
+                <span>Панель администратора & Бухгалтерия</span>
+                <span className="px-2 py-0.5 rounded text-[10px] bg-atmos-orange/20 text-atmos-orange font-mono">
+                  «АтмоС»
+                </span>
               </h1>
-              <p className="text-xs text-atmos-muted">
-                РФСОО Федерация гонок дронов РО & Академия пилотов «АтмоС»
+              <p className="text-xs text-atmos-muted mt-0.5">
+                Реестр участников мастер-классов • Выгрузка отчетности в Excel (152-ФЗ)
               </p>
             </div>
           </div>
+
+          {isAuthenticated && (
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => {
+                  setIsAuthenticated(false);
+                  setAdminKey('');
+                  setBookings([]);
+                }}
+                className="px-3.5 py-2 rounded-xl bg-atmos-surface hover:bg-atmos-card border border-atmos-border text-xs text-atmos-muted hover:text-white"
+              >
+                Выйти
+              </button>
+            </div>
+          )}
         </div>
 
+        {/* Auth Box */}
         {!isAuthenticated ? (
-          /* Login Screen for Accountant */
-          <div className="max-w-md mx-auto my-16 p-8 rounded-3xl bg-atmos-surface border border-atmos-orange/40 shadow-card-glow text-center">
-            <div className="w-16 h-16 rounded-2xl bg-atmos-orange/10 border border-atmos-orange/40 flex items-center justify-center text-atmos-orange mx-auto mb-6 shadow-neon-orange">
+          <div className="max-w-md mx-auto my-16 p-6 sm:p-8 rounded-3xl bg-atmos-surface border border-atmos-border shadow-card-glow text-center">
+            <div className="w-16 h-16 rounded-2xl bg-atmos-orange/10 border border-atmos-orange/30 flex items-center justify-center text-atmos-orange mx-auto mb-4">
               <KeyRound className="w-8 h-8" />
             </div>
 
@@ -236,7 +247,7 @@ export default function AdminPage() {
                     Экспорт реестра участников для бухгалтерии
                   </h3>
                   <p className="text-sm text-atmos-muted">
-                    Файл формируется моментально в формате .xlsx с разделением по слотам и статусам
+                    Файл формируется моментально в формате .xlsx с колонкой филиала и разделением по слотам
                   </p>
                 </div>
               </div>
@@ -247,22 +258,40 @@ export default function AdminPage() {
                   className="w-full lg:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-black text-base shadow-lg hover:shadow-green-500/30 transition-all flex items-center justify-center space-x-3 group"
                 >
                   <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
-                  <span>Скачать все записи в Excel (.xlsx)</span>
+                  <span>Скачать записи в Excel (.xlsx)</span>
                 </button>
               </div>
             </div>
 
             {/* Filters and Search Bar */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 rounded-2xl bg-atmos-surface border border-atmos-border">
-              <div className="flex items-center space-x-3">
-                <Calendar className="w-4 h-4 text-atmos-orange" />
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="bg-atmos-dark border border-atmos-border rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:border-atmos-orange outline-none font-mono"
-                  title="Фильтр по конкретной дате"
-                />
+            <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 p-4 rounded-2xl bg-atmos-surface border border-atmos-border">
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Branch filter */}
+                <div className="flex items-center space-x-2 bg-atmos-dark border border-atmos-border rounded-xl px-3 py-2 text-xs sm:text-sm">
+                  <Building2 className="w-4 h-4 text-atmos-orange" />
+                  <select
+                    value={selectedBranch}
+                    onChange={(e) => setSelectedBranch(e.target.value)}
+                    className="bg-transparent text-white outline-none cursor-pointer text-xs sm:text-sm"
+                  >
+                    <option value="all" className="bg-atmos-surface text-white">Все филиалы</option>
+                    <option value="main" className="bg-atmos-surface text-white">Центральный (Ворошиловский)</option>
+                    <option value="levenc" className="bg-atmos-surface text-white">Левенцовский (Жукова, 18)</option>
+                  </select>
+                </div>
+
+                {/* Date filter */}
+                <div className="flex items-center space-x-2 bg-atmos-dark border border-atmos-border rounded-xl px-3 py-2 text-xs sm:text-sm">
+                  <Calendar className="w-4 h-4 text-atmos-orange" />
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    className="bg-transparent text-white outline-none font-mono text-xs sm:text-sm"
+                    title="Фильтр по конкретной дате"
+                  />
+                </div>
+
                 {selectedDate && (
                   <button
                     onClick={() => setSelectedDate('')}
@@ -301,6 +330,7 @@ export default function AdminPage() {
                   <thead className="bg-atmos-card/80 text-atmos-muted uppercase text-[10px] tracking-wider border-b border-atmos-border">
                     <tr>
                       <th className="py-3 px-4">№</th>
+                      <th className="py-3 px-4">Филиал</th>
                       <th className="py-3 px-4">Дата</th>
                       <th className="py-3 px-4">Слот</th>
                       <th className="py-3 px-4">ФИО Участника</th>
@@ -314,7 +344,7 @@ export default function AdminPage() {
                   <tbody className="divide-y divide-atmos-border">
                     {filteredBookings.length === 0 ? (
                       <tr>
-                        <td colSpan={9} className="py-8 text-center text-atmos-subtle">
+                        <td colSpan={10} className="py-8 text-center text-atmos-subtle">
                           Записей пока нет или ничего не найдено по фильтрам.
                         </td>
                       </tr>
@@ -322,19 +352,30 @@ export default function AdminPage() {
                       filteredBookings.map((b) => (
                         <tr key={b.id} className="hover:bg-atmos-card/50 transition-colors">
                           <td className="py-3 px-4 font-mono text-atmos-subtle">#{b.id}</td>
+                          <td className="py-3 px-4">
+                            {b.branch === 'levenc' ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                                Левенцовский
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                                Центральный
+                              </span>
+                            )}
+                          </td>
                           <td className="py-3 px-4 font-medium text-white">{b.date}</td>
-                          <td className="py-3 px-4 text-atmos-orange font-mono">{b.time_slot}</td>
+                          <td className="py-3 px-4 text-atmos-orange font-mono font-semibold">{b.time_slot}</td>
                           <td className="py-3 px-4 font-bold text-white">{b.full_name}</td>
                           <td className="py-3 px-4 font-mono text-atmos-muted">{b.phone}</td>
                           <td className="py-3 px-4">{b.age} лет</td>
                           <td className="py-3 px-4">
                             {b.is_minor ? (
                               <span className="px-2 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                                Несовершеннолетний (&lt;18)
+                                &lt;18 лет (с родителями)
                               </span>
                             ) : (
                               <span className="px-2 py-0.5 rounded-full text-[10px] bg-green-500/20 text-green-400 border border-green-500/30">
-                                Взрослый
+                                18+ (взрослый)
                               </span>
                             )}
                           </td>

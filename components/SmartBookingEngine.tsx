@@ -19,6 +19,7 @@ import {
   Flag,
 } from 'lucide-react';
 import { DEFAULT_SLOTS } from '@/lib/slots';
+import { BranchConfig, MAIN_BRANCH } from '@/lib/branches';
 import { Consent152Modal, PrivacyPolicyModal } from './LegalModals';
 
 interface SlotStatus {
@@ -28,6 +29,10 @@ interface SlotStatus {
   available: number;
   isFull: boolean;
   isLow: boolean;
+}
+
+interface SmartBookingEngineProps {
+  branchConfig?: BranchConfig;
 }
 
 const MONTH_NAMES_RU = [
@@ -57,7 +62,7 @@ function getInitialValidDate(today: Date): string {
   return formatIsoDate(d);
 }
 
-export const SmartBookingEngine: React.FC = () => {
+export const SmartBookingEngine: React.FC<SmartBookingEngineProps> = ({ branchConfig = MAIN_BRANCH }) => {
   // Today's date initialized
   const today = useMemo(() => new Date(), []);
   const todayMidnight = useMemo(() => new Date(today.getFullYear(), today.getMonth(), today.getDate()), [today]);
@@ -101,7 +106,7 @@ export const SmartBookingEngine: React.FC = () => {
   const fetchSlots = async (date: string) => {
     setLoadingSlots(true);
     try {
-      const res = await fetch(`/api/slots?date=${date}`);
+      const res = await fetch(`/api/slots?date=${date}&branch=${branchConfig.id}`);
       if (res.ok) {
         const data = await res.json();
         setSlotsState(data.slots || []);
@@ -127,7 +132,7 @@ export const SmartBookingEngine: React.FC = () => {
   useEffect(() => {
     fetchSlots(selectedDate);
     setSelectedSlot('');
-  }, [selectedDate]);
+  }, [selectedDate, branchConfig.id]);
 
   // Phone input mask (+7 (999) 999-22-11)
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -245,6 +250,7 @@ export const SmartBookingEngine: React.FC = () => {
           age: parsedAge,
           date: selectedDate,
           timeSlot: selectedSlot,
+          branch: branchConfig.id,
           consent152,
           website: honeypot,
         }),
@@ -295,6 +301,12 @@ export const SmartBookingEngine: React.FC = () => {
           <p className="text-atmos-muted text-sm sm:text-base max-w-2xl mx-auto">
             Выберите дату в интерактивном календаре, свободный временной слот и подтвердите участие. Количество мест лимитировано регламентом безопасности полетов.
           </p>
+
+          {branchConfig.bookingNote && (
+            <div className="mt-4 inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-atmos-card border border-atmos-orange/40 text-xs sm:text-sm text-atmos-orange font-semibold shadow-neon-orange/15">
+              <span>{branchConfig.bookingNote}</span>
+            </div>
+          )}
         </div>
 
         {/* Confirmed View */}
@@ -343,7 +355,7 @@ export const SmartBookingEngine: React.FC = () => {
                 </div>
                 <div>
                   <div className="text-atmos-subtle">Локация</div>
-                  <div className="font-bold text-white mt-0.5">г. Ростов-на-Дону, Ворошиловский пр-т, 32/104</div>
+                  <div className="font-bold text-white mt-0.5">{branchConfig.address}</div>
                 </div>
               </div>
             </div>

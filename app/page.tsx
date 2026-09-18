@@ -7,6 +7,7 @@ import { SafetyBanner } from '@/components/SafetyBanner';
 import { SmartBookingEngine } from '@/components/SmartBookingEngine';
 import { CookieBanner } from '@/components/CookieBanner';
 import { Footer } from '@/components/Footer';
+import { MAIN_BRANCH } from '@/lib/branches';
 
 export default function Home() {
   return (
@@ -18,7 +19,7 @@ export default function Home() {
       <Header />
 
       {/* Hero Section */}
-      <HeroSection />
+      <HeroSection branchConfig={MAIN_BRANCH} />
 
       {/* Experience / Features Section */}
       <ExperienceSection />
@@ -27,10 +28,10 @@ export default function Home() {
       <SafetyBanner />
 
       {/* Interactive Booking Module */}
-      <SmartBookingEngine />
+      <SmartBookingEngine branchConfig={MAIN_BRANCH} />
 
       {/* Footer */}
-      <Footer />
+      <Footer branchConfig={MAIN_BRANCH} />
 
       {/* Cookie Notification Banner (152-FZ Compliant) */}
       <CookieBanner />

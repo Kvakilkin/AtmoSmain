@@ -1,10 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Crosshair, MapPin, Phone, Mail, Shield, ExternalLink, Lock } from 'lucide-react';
+import { Crosshair, MapPin, Phone, Mail, Shield, ExternalLink } from 'lucide-react';
 import { Consent152Modal, PrivacyPolicyModal } from './LegalModals';
+import { BranchConfig, MAIN_BRANCH } from '@/lib/branches';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  branchConfig?: BranchConfig;
+}
+
+export const Footer: React.FC<FooterProps> = ({ branchConfig = MAIN_BRANCH }) => {
   const [isConsentOpen, setIsConsentOpen] = useState(false);
   const [isPolicyOpen, setIsPolicyOpen] = useState(false);
 
@@ -45,11 +50,13 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2.5 text-sm text-atmos-muted">
               <li className="flex items-start space-x-2">
                 <MapPin className="w-4 h-4 text-atmos-orange flex-shrink-0 mt-1" />
-                <span>г. Ростов-на-Дону, Дрон-арена «АтмоС» (Ворошиловский проспект, 32/104)</span>
+                <span>{branchConfig.address} ({branchConfig.name})</span>
               </li>
               <li className="flex items-center space-x-2">
                 <Phone className="w-4 h-4 text-atmos-orange flex-shrink-0" />
-                <span>+7 (863) 200-55-11</span>
+                <a href={`tel:${branchConfig.phoneRaw}`} className="hover:text-white transition-colors">
+                  {branchConfig.phone}
+                </a>
               </li>
               <li className="flex items-center space-x-2">
                 <Mail className="w-4 h-4 text-atmos-orange flex-shrink-0" />
@@ -88,15 +95,6 @@ export const Footer: React.FC = () => {
                   className="hover:text-atmos-orange transition-colors"
                 >
                   Регламент безопасности полетов
-                </a>
-              </li>
-              <li className="pt-2">
-                <a
-                  href="/admin"
-                  className="inline-flex items-center space-x-1.5 text-xs text-atmos-subtle hover:text-white transition-colors"
-                >
-                  <Lock className="w-3.5 h-3.5 text-atmos-orange" />
-                  <span>Вход для бухгалтера / выгрузка Excel</span>
                 </a>
               </li>
             </ul>

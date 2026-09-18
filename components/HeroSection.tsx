@@ -1,9 +1,14 @@
 'use client';
 
 import React from 'react';
-import { Shield, Zap, Users, Trophy, Flame, ChevronDown, CheckCircle2, MapPin, ExternalLink } from 'lucide-react';
+import { Shield, Zap, Users, Trophy, Flame, ChevronDown, CheckCircle2, MapPin, ExternalLink, Phone, Sparkles } from 'lucide-react';
+import { BranchConfig, MAIN_BRANCH } from '@/lib/branches';
 
-export const HeroSection: React.FC = () => {
+interface HeroSectionProps {
+  branchConfig?: BranchConfig;
+}
+
+export const HeroSection: React.FC<HeroSectionProps> = ({ branchConfig = MAIN_BRANCH }) => {
   const scrollToBooking = () => {
     const element = document.getElementById('booking');
     if (element) {
@@ -41,21 +46,37 @@ export const HeroSection: React.FC = () => {
           </div>
         </div>
 
-        {/* H1 Main Heading - Short & Impactful */}
+        {/* Top Badge (if any) */}
+        {branchConfig.badgeTop && (
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-atmos-orange/10 border border-atmos-orange/40 text-atmos-orange text-xs sm:text-sm font-bold uppercase tracking-wider mb-4 shadow-neon-orange">
+            <Sparkles className="w-4 h-4" />
+            <span>{branchConfig.badgeTop}</span>
+          </div>
+        )}
+
+        {/* H1 Main Heading */}
         <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-tight mb-4">
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-atmos-orange via-atmos-orangeBright to-white glow-text-orange">
-            Стань пилотом гоночного дрона
+            {branchConfig.titleGradient}
           </span>
           <br />
           <span className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white/90">
-            День открытых дверей в Ростове-на-Дону
+            {branchConfig.titleMain}
           </span>
         </h1>
 
-        {/* Subtitle - Short */}
-        <p className="max-w-2xl mx-auto text-sm sm:text-base text-atmos-muted leading-relaxed mb-8 font-normal">
-          Открытый мастер-класс Академии пилотов «АтмоС» и Федерации гонок дронов. Бесплатный вход, экипировка выдается.
+        {/* Subtitle */}
+        <p className="max-w-2xl mx-auto text-sm sm:text-base text-atmos-muted leading-relaxed mb-6 font-normal">
+          {branchConfig.subtitle}
         </p>
+
+        {/* Notice text pill (if configured) */}
+        {branchConfig.noticeText && (
+          <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-atmos-card border border-atmos-orange/50 text-xs sm:text-sm font-semibold text-white mb-6 shadow-neon-orange/20">
+            <Sparkles className="w-4 h-4 text-atmos-orange animate-pulse" />
+            <span>{branchConfig.noticeText}</span>
+          </div>
+        )}
 
         {/* Primary CTA and Secondary actions */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
@@ -63,43 +84,46 @@ export const HeroSection: React.FC = () => {
             onClick={scrollToBooking}
             className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-atmos-orange to-red-600 text-white font-bold text-base shadow-neon-orange hover:shadow-neon-glow hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center space-x-3 group"
           >
-            <span>Записаться на мастер-класс</span>
+            <span>Записаться в 1 клик</span>
             <Zap className="w-5 h-5 text-white group-hover:rotate-12 transition-transform" />
           </button>
 
-          <a
-            href="#experience"
-            className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-atmos-surface border border-atmos-border hover:border-atmos-orange/50 text-atmos-muted hover:text-white font-medium text-sm transition-all duration-200"
-          >
-            Узнать подробнее
-          </a>
+          {branchConfig.phone && (
+            <a
+              href={`tel:${branchConfig.phoneRaw}`}
+              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-atmos-surface border border-atmos-border hover:border-atmos-orange/50 text-white font-medium text-sm transition-all duration-200 flex items-center justify-center space-x-2 group"
+            >
+              <Phone className="w-4 h-4 text-atmos-orange group-hover:scale-110 transition-transform" />
+              <span>{branchConfig.phone}</span>
+            </a>
+          )}
         </div>
 
         {/* Branch Location & Yandex Maps Card */}
-        <div className="max-w-4xl mx-auto mb-10 rounded-3xl bg-atmos-surface/90 border border-atmos-orange/30 p-4 sm:p-6 shadow-card-glow text-left backdrop-blur-md">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-atmos-border/80">
-            <div className="flex items-start sm:items-center space-x-3">
+        <div className="max-w-4xl mx-auto mb-10 rounded-3xl bg-atmos-surface/90 border border-atmos-orange/30 p-4 sm:p-6 shadow-card-glow text-center sm:text-left backdrop-blur-md">
+          <div className="flex flex-col sm:flex-row items-center sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-atmos-border/80">
+            <div className="flex flex-col sm:flex-row items-center sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 text-center sm:text-left">
               <div className="w-10 h-10 rounded-xl bg-atmos-orange/15 border border-atmos-orange/40 flex items-center justify-center text-atmos-orange flex-shrink-0 shadow-neon-orange">
                 <MapPin className="w-5 h-5" />
               </div>
               <div>
-                <div className="flex items-center space-x-2">
-                  <h3 className="text-sm sm:text-base font-bold text-white">
-                    Дрон-арена «АтмоС» • Филиал «Центральный»
+                <div className="flex items-center justify-center sm:justify-start space-x-2">
+                  <h3 className="text-sm sm:text-base font-bold text-white text-center sm:text-left">
+                    {branchConfig.name}
                   </h3>
                   <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-green-500/20 text-green-400 border border-green-500/40">
-                    Открыто для полетов
+                    {branchConfig.statusBadge}
                   </span>
                 </div>
-                <p className="text-xs text-atmos-muted mt-0.5">
-                  г. Ростов-на-Дону, Ворошиловский проспект, 32/104
+                <p className="text-xs text-atmos-muted mt-0.5 text-center sm:text-left">
+                  {branchConfig.address}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center justify-center sm:justify-end space-x-2">
               <a
-                href="https://yandex.ru/maps/-/CTxlu6lw"
+                href={branchConfig.mapLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-atmos-card hover:bg-atmos-cardHover border border-atmos-border hover:border-atmos-orange/50 text-xs text-white font-medium transition-all group"
@@ -113,40 +137,23 @@ export const HeroSection: React.FC = () => {
           {/* Interactive Yandex Maps Embed */}
           <div className="relative w-full h-[220px] sm:h-[260px] rounded-2xl overflow-hidden border border-atmos-border shadow-inner">
             <iframe
-              src="https://yandex.ru/map-widget/v1/?ll=39.717867%2C47.225453&z=17&pt=39.717798,47.225475,pm2orgm"
+              src={branchConfig.mapWidgetUrl}
               width="100%"
               height="100%"
               frameBorder="0"
               allowFullScreen={true}
-              title="Яндекс Карта — Дрон-арена АтмоС, Ворошиловский проспект, 32/104"
+              title={`Яндекс Карта — ${branchConfig.name}`}
               className="w-full h-full filter contrast-[1.05] brightness-[0.95]"
               loading="lazy"
             />
             {/* Overlay hint badge */}
             <div className="absolute bottom-2.5 left-2.5 bg-atmos-dark/95 backdrop-blur-md px-3 py-1.5 rounded-lg border border-atmos-border text-[11px] text-white flex items-center space-x-2 pointer-events-none shadow-lg">
               <span className="w-2 h-2 rounded-full bg-atmos-orange animate-ping" />
-              <span className="font-medium">Ворошиловский проспект, 32/104</span>
+              <span className="font-medium">{branchConfig.address}</span>
             </div>
           </div>
         </div>
 
-        {/* Feature Pills */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto mb-12">
-          <div className="flex items-center justify-center space-x-2 px-4 py-3 rounded-lg bg-atmos-card/80 border border-atmos-border/60 backdrop-blur-sm">
-            <CheckCircle2 className="w-5 h-5 text-atmos-orange flex-shrink-0" />
-            <span className="text-sm font-semibold text-white">Бесплатный вход</span>
-          </div>
-
-          <div className="flex items-center justify-center space-x-2 px-4 py-3 rounded-lg bg-atmos-card/80 border border-atmos-border/60 backdrop-blur-sm">
-            <CheckCircle2 className="w-5 h-5 text-atmos-orange flex-shrink-0" />
-            <span className="text-sm font-semibold text-white">Экипировка выдается</span>
-          </div>
-
-          <div className="flex items-center justify-center space-x-2 px-4 py-3 rounded-lg bg-atmos-card/80 border border-atmos-border/60 backdrop-blur-sm">
-            <CheckCircle2 className="w-5 h-5 text-atmos-orange flex-shrink-0" />
-            <span className="text-sm font-semibold text-white">Ограниченное число слотов</span>
-          </div>
-        </div>
 
         {/* High-tech Specs Ribbon */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-atmos-border/60 max-w-4xl mx-auto text-left">

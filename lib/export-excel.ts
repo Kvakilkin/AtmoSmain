@@ -6,6 +6,9 @@ export function generateBookingsExcel(bookings: BookingRecord[]): Buffer {
   const data = bookings.map((b) => {
     const isMinorText = b.is_minor ? 'Да (<18 лет, с родителями)' : 'Взрослый (18+)';
     const capacity = getSlotCapacity(b.time_slot);
+    const branchName = b.branch === 'levenc' 
+      ? 'Левенцовский (Жукова, 18)' 
+      : 'Центральный (Ворошиловский)';
     
     // Format Russian phone display
     let formattedPhone = b.phone;
@@ -26,6 +29,7 @@ export function generateBookingsExcel(bookings: BookingRecord[]): Buffer {
 
     return {
       'ID': b.id,
+      'Филиал / Локация': branchName,
       'Дата мастер-класса': b.date,
       'Временной слот': b.time_slot,
       'Лимит слота': `${capacity} мест`,
@@ -44,6 +48,7 @@ export function generateBookingsExcel(bookings: BookingRecord[]): Buffer {
   // 3. Set custom column widths for pristine accountant printing/viewing
   worksheet['!cols'] = [
     { wch: 6 },  // ID
+    { wch: 28 }, // Филиал / Локация
     { wch: 14 }, // Дата
     { wch: 18 }, // Слот
     { wch: 12 }, // Лимит

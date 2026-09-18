@@ -12,6 +12,7 @@ export interface BookingRecord {
   age: number;
   date: string;
   time_slot: string;
+  branch: string;
   is_minor: number;
   consent_152: number;
   ip_address: string;
@@ -58,6 +59,7 @@ export function getDatabase() {
         age INTEGER NOT NULL,
         date TEXT NOT NULL,
         time_slot TEXT NOT NULL,
+        branch TEXT NOT NULL DEFAULT 'main',
         is_minor INTEGER NOT NULL DEFAULT 0,
         consent_152 INTEGER NOT NULL DEFAULT 1,
         ip_address TEXT,
@@ -68,6 +70,22 @@ export function getDatabase() {
       CREATE INDEX IF NOT EXISTS idx_bookings_phone ON bookings (phone);
     `);
 
+    // Migration: ensure branch column exists if table was created previously
+    try {
+      const tableInfo = dbInstance.prepare("PRAGMA table_info(bookings)").all() as Array<{ name: string }>;
+      const hasBranch = tableInfo.some((col: any) => col.name === 'branch');
+      if (!hasBranch) {
+        dbInstance.exec("ALTER TABLE bookings ADD COLUMN branch TEXT NOT NULL DEFAULT 'main';");
+      }
+    } catch (e) {
+      console.error('Migration pragma check notice:', e);
+    }
+
+    // Now safely create index on branch
+    dbInstance.exec(`
+      CREATE INDEX IF NOT EXISTS idx_bookings_branch ON bookings (branch);
+    `);
+
     return dbInstance;
   } catch (err) {
     console.error('Failed to initialize native SQLite database:', err);
@@ -76,29 +94,29 @@ export function getDatabase() {
 }
 
 /**
- * Returns the count of booked seats for a specific date and time slot
+ * Returns the count of booked seats for a specific date, time slot, and branch
  */
-export function getBookedCount(date: string, timeSlot: string): number {
+export function getBookedCount(date: string, timeSlot: string, branch = 'main'): number {
   const db = getDatabase();
-  const stmt = db.prepare('SELECT COUNT(*) as count FROM bookings WHERE date = ? AND time_slot = ?');
-  const result = stmt.get(date, timeSlot) as { count: number } | undefined;
+  const stmt = db.prepare('SELECT COUNT(*) as count FROM bookings WHERE date = ? AND time_slot = ? AND branch = ?');
+  const result = stmt.get(date, timeSlot, branch) as { count: number } | undefined;
   return result?.count ?? 0;
 }
 
 /**
- * Returns slot occupancy overview for a given date
+ * Returns slot occupancy overview for a given date and branch
  */
-export function getSlotOverview(date: string, availableSlots: string[]) {
+export function getSlotOverview(date: string, availableSlots: string[], branch = 'main') {
   const db = getDatabase();
-  const stmt = db.prepare('SELECT time_slot, COUNT(*) as count FROM bookings WHERE date = ? GROUP BY time_slot');
-  const rows = stmt.all(date) as Array<{ time_slot: string; count: number }>;
+  const stmt = db.prepare('SELECT time_slot, COUNT(*) as count FROM bookings WHERE date = ? AND branch = ? GROUP BY time_slot');
+  const rows = stmt.all(date, branch) as Array<{ time_slot: string; count: number }>;
   
   const countMap = new Map<string, number>();
   for (const row of rows) {
     countMap.set(row.time_slot, row.count);
   }
 
-  return availableSlots.map(slot => {
+  return availableSlots.map((slot) => {
     const booked = countMap.get(slot) || 0;
     const capacity = getSlotCapacity(slot);
     const available = Math.max(0, capacity - booked);
@@ -122,18 +140,20 @@ export function createBooking(data: {
   age: number;
   date: string;
   timeSlot: string;
+  branch?: string;
   ipAddress: string;
 }): { success: boolean; bookingId?: number; error?: string } {
   const db = getDatabase();
+  const branch = data.branch || 'main';
   const capacity = getSlotCapacity(data.timeSlot);
 
   // Use explicit BEGIN IMMEDIATE to lock writing and prevent race conditions
   db.exec('BEGIN IMMEDIATE');
 
   try {
-    // 1. Check current capacity inside transaction
-    const countStmt = db.prepare('SELECT COUNT(*) as count FROM bookings WHERE date = ? AND time_slot = ?');
-    const res = countStmt.get(data.date, data.timeSlot) as { count: number };
+    // 1. Check current capacity inside transaction for this specific branch
+    const countStmt = db.prepare('SELECT COUNT(*) as count FROM bookings WHERE date = ? AND time_slot = ? AND branch = ?');
+    const res = countStmt.get(data.date, data.timeSlot, branch) as { count: number };
     const currentCount = res?.count || 0;
 
     if (currentCount >= capacity) {
@@ -144,21 +164,21 @@ export function createBooking(data: {
       };
     }
 
-    // 2. Check if this phone number is already registered for this specific date and slot
-    const duplicateStmt = db.prepare('SELECT id FROM bookings WHERE phone = ? AND date = ? AND time_slot = ?');
-    const existing = duplicateStmt.get(data.phone, data.date, data.timeSlot);
+    // 2. Check if this phone number is already registered for this specific date, slot, and branch
+    const duplicateStmt = db.prepare('SELECT id FROM bookings WHERE phone = ? AND date = ? AND time_slot = ? AND branch = ?');
+    const existing = duplicateStmt.get(data.phone, data.date, data.timeSlot, branch);
     if (existing) {
       db.exec('ROLLBACK');
       return {
         success: false,
-        error: 'По данному номеру телефона уже оформлена запись на этот слот.'
+        error: 'По данному номеру телефона уже оформлена запись на этот слот в этом филиале.'
       };
     }
 
     // 3. Insert new booking with parameterized statement
     const insertStmt = db.prepare(`
-      INSERT INTO bookings (full_name, phone, age, date, time_slot, is_minor, consent_152, ip_address, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)
+      INSERT INTO bookings (full_name, phone, age, date, time_slot, branch, is_minor, consent_152, ip_address, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)
     `);
 
     const isMinor = data.age < 18 ? 1 : 0;
@@ -170,6 +190,7 @@ export function createBooking(data: {
       data.age,
       data.date,
       data.timeSlot,
+      branch,
       isMinor,
       data.ipAddress,
       createdAt
@@ -191,17 +212,31 @@ export function createBooking(data: {
 }
 
 /**
- * Get all bookings (with optional date filter) for admin & export
+ * Get all bookings (with optional date and branch filter) for admin & export
  */
-export function getAllBookings(dateFilter?: string): BookingRecord[] {
+export function getAllBookings(dateFilter?: string, branchFilter?: string): BookingRecord[] {
   const db = getDatabase();
+  let query = 'SELECT * FROM bookings';
+  const params: any[] = [];
+  const conditions: string[] = [];
+
   if (dateFilter) {
-    const stmt = db.prepare('SELECT * FROM bookings WHERE date = ? ORDER BY time_slot ASC, id ASC');
-    return stmt.all(dateFilter) as BookingRecord[];
-  } else {
-    const stmt = db.prepare('SELECT * FROM bookings ORDER BY date ASC, time_slot ASC, id ASC');
-    return stmt.all() as BookingRecord[];
+    conditions.push('date = ?');
+    params.push(dateFilter);
   }
+
+  if (branchFilter && branchFilter !== 'all') {
+    conditions.push('branch = ?');
+    params.push(branchFilter);
+  }
+
+  if (conditions.length > 0) {
+    query += ' WHERE ' + conditions.join(' AND ');
+  }
+
+  query += ' ORDER BY date ASC, time_slot ASC, id ASC';
+  const stmt = db.prepare(query);
+  return stmt.all(...params) as BookingRecord[];
 }
 
 /**

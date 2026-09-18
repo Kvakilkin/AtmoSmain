@@ -59,10 +59,11 @@ export async function POST(req: NextRequest) {
     const sanitizedPhone = data.phone; // already digits only from schema
     const sanitizedDate = data.date;
     const sanitizedSlot = sanitizeString(data.timeSlot);
+    const sanitizedBranch = data.branch ? sanitizeString(data.branch) : 'main';
 
     // 5. Pre-check slot capacity before attempting database transaction
     const capacity = getSlotCapacity(sanitizedSlot);
-    const booked = getBookedCount(sanitizedDate, sanitizedSlot);
+    const booked = getBookedCount(sanitizedDate, sanitizedSlot, sanitizedBranch);
     if (booked >= capacity) {
       return NextResponse.json(
         {
@@ -80,6 +81,7 @@ export async function POST(req: NextRequest) {
       age: data.age,
       date: sanitizedDate,
       timeSlot: sanitizedSlot,
+      branch: sanitizedBranch,
       ipAddress: ip,
     });
 
@@ -98,6 +100,7 @@ export async function POST(req: NextRequest) {
       age: data.age,
       date: sanitizedDate,
       timeSlot: sanitizedSlot,
+      branch: sanitizedBranch,
       isMinor: data.age < 18,
       createdAt: new Date().toISOString(),
     }).catch(() => {});

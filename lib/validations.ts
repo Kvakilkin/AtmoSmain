@@ -56,6 +56,7 @@ export const BookingSchema = z.object({
     .literal(true, {
       errorMap: () => ({ message: 'Необходимо согласие на обработку персональных данных (152-ФЗ)' }),
     }),
+  branch: z.string().optional(),
   // Honeypot for bot detection
   website: z.string().max(0, { message: 'Spam detected' }).optional().or(z.literal('')),
 });

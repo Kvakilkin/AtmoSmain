@@ -14,11 +14,13 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const branch = searchParams.get('branch') || 'main';
     const slotNames = DEFAULT_SLOTS.map((s) => s.time);
-    const overview = getSlotOverview(date, slotNames);
+    const overview = getSlotOverview(date, slotNames, branch);
 
     return NextResponse.json({
       date,
+      branch,
       slots: overview,
     });
   } catch (err: any) {
